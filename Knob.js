@@ -67,8 +67,6 @@ class Knob extends React.Component {
 
   constructor(props) {
     super(props);
-    this.w = this.props.width || 200;
-    this.h = this.props.height || this.w;
     this.cursorExt = this.props.cursor === true ? 0.3 : this.props.cursor / 100;
     this.angleArc = this.props.angleArc * Math.PI / 180;
     this.angleOffset = this.props.angleOffset * Math.PI / 180;
@@ -85,15 +83,6 @@ class Knob extends React.Component {
     this.drawCanvas();
     if (!this.props.readOnly) {
       this.canvasRef.addEventListener('touchstart', this.handleTouchStart, { passive: false });
-    }
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.width && this.w !== nextProps.width) {
-      this.w = nextProps.width;
-    }
-    if (nextProps.height && this.h !== nextProps.height) {
-      this.h = nextProps.height;
     }
   }
 
@@ -151,7 +140,7 @@ class Knob extends React.Component {
     const bounds = this.canvasRef.getBoundingClientRect();
     const x = e.clientX - bounds.left;
     const y = e.clientY - bounds.top;
-    let a = Math.atan2(x - (this.w / 2), (this.w / 2) - y) - this.angleOffset;
+    let a = Math.atan2(x - (this.props.width / 2), (this.props.width / 2) - y) - this.angleOffset;
     if (!this.props.clockwise) {
       a = this.angleArc - a - (2 * Math.PI);
     }
@@ -200,7 +189,7 @@ class Knob extends React.Component {
   };
 
   handleTouchEnd = (e) => {
-    this.props.onChangeEnd(this.eventToValue(e));
+    this.props.onChangeEnd(this.eventToValue(e.changedTouches[this.touchIndex]));
     document.removeEventListener('touchmove', this.handleTouchMove);
     document.removeEventListener('touchend', this.handleTouchEnd);
     document.removeEventListener('touchcancel', this.handleTouchEnd);
@@ -254,15 +243,15 @@ class Knob extends React.Component {
   };
 
   inputStyle = () => ({
-    width: `${((this.w / 2) + 4) >> 0}px`,
-    height: `${(this.w / 3) >> 0}px`,
+    width: `${((this.props.width / 2) + 4) >> 0}px`,
+    height: `${(this.props.width / 3) >> 0}px`,
     position: 'absolute',
     verticalAlign: 'middle',
-    marginTop: `${(this.w / 3) >> 0}px`,
-    marginLeft: `-${((this.w * 3 / 4) + 2) >> 0}px`,
+    marginTop: `${(this.props.width / 3) >> 0}px`,
+    marginLeft: `-${((this.props.width * 3 / 4) + 2) >> 0}px`,
     border: 0,
     background: 'none',
-    font: `${this.props.fontWeight} ${(this.w / this.digits) >> 0}px ${this.props.font}`,
+    font: `${this.props.fontWeight} ${(this.props.width / this.digits) >> 0}px ${this.props.font}`,
     textAlign: 'center',
     color: this.props.inputColor || this.props.fgColor,
     padding: '0px',
@@ -272,10 +261,10 @@ class Knob extends React.Component {
   drawCanvas() {
     const ctx = this.canvasRef.getContext('2d');
     const scale = this.getCanvasScale(ctx);
-    this.canvasRef.width = this.w * scale; // clears the canvas
-    this.canvasRef.height = this.h * scale;
+    this.canvasRef.width = this.props.width * scale; // clears the canvas
+    this.canvasRef.height = this.props.height * scale;
     ctx.scale(scale, scale);
-    this.xy = this.w / 2; // coordinates of canvas center
+    this.xy = this.props.width / 2; // coordinates of canvas center
     this.lineWidth = this.xy * this.props.thickness;
     this.radius = this.xy - (this.lineWidth / 2);
     ctx.lineWidth = this.lineWidth;
@@ -346,14 +335,15 @@ class Knob extends React.Component {
     return (
       <div
         className={className}
-        style={{ width: this.w, height: this.h, display: 'inline-block' }}
+        style={{ width: this.props.width, height: this.props.height, display: 'inline-block' }}
         onWheel={readOnly || disableMouseWheel ? null : this.handleWheel}
       >
         <canvas
           ref={(ref) => { this.canvasRef = ref; }}
           className={canvasClassName}
           style={{ width: '100%', height: '100%' }}
-          onMouseDown={readOnly ? null : this.handleMouseDown}
+          onMouseDown={readOnly ? undefined : this.handleMouseDown}
+          onTouchStart={readOnly ? undefined : this.handleTouchStart}
           title={title ? `${title}: ${value}` : value}
         />
         {this.renderCenter()}

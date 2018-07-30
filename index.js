@@ -72,7 +72,7 @@ var Knob = function (_React$Component) {
       var bounds = _this.canvasRef.getBoundingClientRect();
       var x = e.clientX - bounds.left;
       var y = e.clientY - bounds.top;
-      var a = Math.atan2(x - _this.w / 2, _this.w / 2 - y) - _this.angleOffset;
+      var a = Math.atan2(x - _this.props.width / 2, _this.props.width / 2 - y) - _this.angleOffset;
       if (!_this.props.clockwise) {
         a = _this.angleArc - a - 2 * Math.PI;
       }
@@ -119,7 +119,7 @@ var Knob = function (_React$Component) {
     };
 
     _this.handleTouchEnd = function (e) {
-      _this.props.onChangeEnd(_this.eventToValue(e));
+      _this.props.onChangeEnd(_this.eventToValue(e.changedTouches[_this.touchIndex]));
       document.removeEventListener('touchmove', _this.handleTouchMove);
       document.removeEventListener('touchend', _this.handleTouchEnd);
       document.removeEventListener('touchcancel', _this.handleTouchEnd);
@@ -158,15 +158,15 @@ var Knob = function (_React$Component) {
 
     _this.inputStyle = function () {
       return {
-        width: (_this.w / 2 + 4 >> 0) + 'px',
-        height: (_this.w / 3 >> 0) + 'px',
+        width: (_this.props.width / 2 + 4 >> 0) + 'px',
+        height: (_this.props.width / 3 >> 0) + 'px',
         position: 'absolute',
         verticalAlign: 'middle',
-        marginTop: (_this.w / 3 >> 0) + 'px',
-        marginLeft: '-' + (_this.w * 3 / 4 + 2 >> 0) + 'px',
+        marginTop: (_this.props.width / 3 >> 0) + 'px',
+        marginLeft: '-' + (_this.props.width * 3 / 4 + 2 >> 0) + 'px',
         border: 0,
         background: 'none',
-        font: _this.props.fontWeight + ' ' + (_this.w / _this.digits >> 0) + 'px ' + _this.props.font,
+        font: _this.props.fontWeight + ' ' + (_this.props.width / _this.digits >> 0) + 'px ' + _this.props.font,
         textAlign: 'center',
         color: _this.props.inputColor || _this.props.fgColor,
         padding: '0px',
@@ -198,8 +198,6 @@ var Knob = function (_React$Component) {
       return null;
     };
 
-    _this.w = _this.props.width || 200;
-    _this.h = _this.props.height || _this.w;
     _this.cursorExt = _this.props.cursor === true ? 0.3 : _this.props.cursor / 100;
     _this.angleArc = _this.props.angleArc * Math.PI / 180;
     _this.angleOffset = _this.props.angleOffset * Math.PI / 180;
@@ -215,16 +213,6 @@ var Knob = function (_React$Component) {
       this.drawCanvas();
       if (!this.props.readOnly) {
         this.canvasRef.addEventListener('touchstart', this.handleTouchStart, { passive: false });
-      }
-    }
-  }, {
-    key: 'componentWillReceiveProps',
-    value: function componentWillReceiveProps(nextProps) {
-      if (nextProps.width && this.w !== nextProps.width) {
-        this.w = nextProps.width;
-      }
-      if (nextProps.height && this.h !== nextProps.height) {
-        this.h = nextProps.height;
       }
     }
   }, {
@@ -245,10 +233,10 @@ var Knob = function (_React$Component) {
     value: function drawCanvas() {
       var ctx = this.canvasRef.getContext('2d');
       var scale = this.getCanvasScale(ctx);
-      this.canvasRef.width = this.w * scale; // clears the canvas
-      this.canvasRef.height = this.h * scale;
+      this.canvasRef.width = this.props.width * scale; // clears the canvas
+      this.canvasRef.height = this.props.height * scale;
       ctx.scale(scale, scale);
-      this.xy = this.w / 2; // coordinates of canvas center
+      this.xy = this.props.width / 2; // coordinates of canvas center
       this.lineWidth = this.xy * this.props.thickness;
       this.radius = this.xy - this.lineWidth / 2;
       ctx.lineWidth = this.lineWidth;
@@ -283,7 +271,7 @@ var Knob = function (_React$Component) {
         'div',
         {
           className: className,
-          style: { width: this.w, height: this.h, display: 'inline-block' },
+          style: { width: this.props.width, height: this.props.height, display: 'inline-block' },
           onWheel: readOnly || disableMouseWheel ? null : this.handleWheel
         },
         _react2.default.createElement('canvas', {
@@ -292,7 +280,8 @@ var Knob = function (_React$Component) {
           },
           className: canvasClassName,
           style: { width: '100%', height: '100%' },
-          onMouseDown: readOnly ? null : this.handleMouseDown,
+          onMouseDown: readOnly ? undefined : this.handleMouseDown,
+          onTouchStart: readOnly ? undefined : this.handleTouchStart,
           title: title ? title + ': ' + value : value
         }),
         this.renderCenter()
