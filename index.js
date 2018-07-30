@@ -87,7 +87,9 @@ var Knob = function (_React$Component) {
     };
 
     _this.handleMouseUp = function (e) {
-      _this.props.onChangeEnd(_this.eventToValue(e));
+      if (_this.props.onChangeEnd) {
+        _this.props.onChangeEnd(_this.eventToValue(e));
+      }
       document.removeEventListener('mousemove', _this.handleMouseMove);
       document.removeEventListener('mouseup', _this.handleMouseUp);
       document.removeEventListener('keyup', _this.handleEsc);
@@ -108,7 +110,9 @@ var Knob = function (_React$Component) {
     };
 
     _this.handleTouchEnd = function (e) {
-      _this.props.onChangeEnd(_this.eventToValue(e.changedTouches[_this.touchIndex]));
+      if (_this.props.onChangeEnd) {
+        _this.props.onChangeEnd(_this.eventToValue(e.changedTouches[_this.touchIndex]));
+      }
       document.removeEventListener('touchmove', _this.handleTouchMove);
       document.removeEventListener('touchend', _this.handleTouchEnd);
       document.removeEventListener('touchcancel', _this.handleTouchEnd);
@@ -192,6 +196,7 @@ var Knob = function (_React$Component) {
           },
           style: { width: '100%', height: '100%' },
           onMouseDown: _this.props.readOnly ? null : _this.handleMouseDown,
+          onTouchStart: _this.props.readOnly ? undefined : _this.handleTouchStart,
           title: _this.props.title ? _this.props.title + ': ' + _this.props.value : _this.props.value
         }),
         _this.renderCentre()
@@ -213,19 +218,11 @@ var Knob = function (_React$Component) {
     key: 'componentDidMount',
     value: function componentDidMount() {
       this.drawCanvas();
-      if (!this.props.readOnly) {
-        this.canvasRef.addEventListener('touchstart', this.handleTouchStart, { passive: false });
-      }
     }
   }, {
     key: 'componentDidUpdate',
     value: function componentDidUpdate() {
       this.drawCanvas();
-    }
-  }, {
-    key: 'componentWillUnmount',
-    value: function componentWillUnmount() {
-      this.canvasRef.removeEventListener('touchstart', this.handleTouchStart);
     }
   }, {
     key: 'drawCanvas',

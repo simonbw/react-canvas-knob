@@ -77,17 +77,10 @@ class Knob extends React.Component {
 
   componentDidMount() {
     this.drawCanvas();
-    if (!this.props.readOnly) {
-      this.canvasRef.addEventListener('touchstart', this.handleTouchStart, { passive: false });
-    }
   }
 
   componentDidUpdate() {
     this.drawCanvas();
-  }
-
-  componentWillUnmount() {
-    this.canvasRef.removeEventListener('touchstart', this.handleTouchStart);
   }
 
   getArcToValue = (v) => {
@@ -179,7 +172,7 @@ class Knob extends React.Component {
 
   handleTouchEnd = (e) => {
     if (this.props.onChangeEnd) {
-      this.props.onChangeEnd(this.eventToValue(e));
+      this.props.onChangeEnd(this.eventToValue(e.changedTouches[this.touchIndex]));
     }
     document.removeEventListener('touchmove', this.handleTouchMove);
     document.removeEventListener('touchend', this.handleTouchEnd);
@@ -312,6 +305,7 @@ class Knob extends React.Component {
         ref={(ref) => { this.canvasRef = ref; }}
         style={{ width: '100%', height: '100%' }}
         onMouseDown={this.props.readOnly ? null : this.handleMouseDown}
+        onTouchStart={this.props.readOnly ? undefined : this.handleTouchStart}
         title={this.props.title ? `${this.props.title}: ${this.props.value}` : this.props.value}
       />
       {this.renderCentre()}
